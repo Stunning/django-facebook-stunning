@@ -1,0 +1,4 @@
+Yet another facebook app for django. 
+
+This one has the bare minimum to receive the canvas page FB post, 
+and the FB JavaScript initialisation HTML.
