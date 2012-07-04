@@ -1,0 +1,52 @@
+{# Facebook JavaScript API load #}
+{% load settings %}
+<div id="fb-root"></div>
+<script type="text/javascript">
+	window.fbAsyncInit = function() {
+		FB.init({
+			appId : '{% settings_value "FACEBOOK_APP_ID" %}', // App ID
+			channelUrl : '{% url facebook_channel %}', // Channel File
+			status : true, // check login status
+			cookie : true, // enable cookies to allow the server to access the session
+			xfbml : true
+		// parse XFBML
+		});
+		FB.Event.subscribe('edge.create', function(response) {
+			console.log('Facebook like: ' + response);
+		});
+		FB.Event.subscribe('xfbml.render', function(response) {
+			console.log('xfbml.render done');
+		});
+		FB.Event.subscribe('auth.statusChange', function(response) {
+			console.log('Facebook status changed to ' + response.status + ":");
+			console.log(response);
+		});
+		FB.Event.subscribe('fb.log', function(response) {
+			console.log('Facebook log: ' + response);
+		});
+		FB.Event.subscribe('edge.create', function(response) {
+			console.log('Facebook edge.create: ' + response);
+			on_like('create', response);
+		});
+		FB.Event.subscribe('edge.remove', function(response) {
+			console.log('Facebook edge.remove: ' + response);
+			on_like('remove', response);
+		});
+		
+		FB.Canvas.setAutoGrow();
+	};
+
+	// Load the SDK Asynchronously
+	(function(d) {
+		var js, id = 'facebook-jssdk', ref = d
+				.getElementsByTagName('script')[0];
+		if (d.getElementById(id)) {
+			return;
+		}
+		js = d.createElement('script');
+		js.id = id;
+		js.async = true;
+		js.src = "//connect.facebook.net/sv_SE/all.js";
+		ref.parentNode.insertBefore(js, ref);
+	}(document));
+</script>
