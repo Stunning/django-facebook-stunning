@@ -49,4 +49,57 @@
 		js.src = "//connect.facebook.net/sv_SE/all.js";
 		ref.parentNode.insertBefore(js, ref);
 	}(document));
+	
+	/* Get facebook data
+	 * 
+	 * To avoid logging in several times, set global fb_scope to all 
+	 * required permissions.
+	 * 
+	 * Example that logs in at most once:
+	 * 
+	 * var fb_scope = "email,hometown";
+	 * 
+	 * facebook_get('/me/', 'email', {}, function(response) {console.log(resonse.email);});
+	 * facebook_get('/me/', 'user_hometown', {}, function(response) {console.log(resonse.hometown.name);});
+	 *
+	 */
+
+	function facebook_get(object, scope, data, callback, debug_login, debug_data, allow_login) {
+		if (window.location.hostname === "localhost") {
+			callback(debug_login || {}, debug_data || {});
+			return;
+		}
+		if (fb_scope) {
+			scope = fb_scope;
+		}
+		allow_login = allow_login || true;
+		var login = FB.getAuthResponse();
+		if (login) {
+			facebook_get_helper(login, object, data, callback);
+		} else if (allow_login) {
+			FB.login(function(login) {
+				if (login.authResponse) {
+					console.log('Logged in');
+					facebook_get_helper(login, object, data, callback);
+				} else {
+					console.log('User cancelled login or did not fully authorize.');
+				}
+			}, {scope: scope});
+		}
+	}
+
+	function facebook_get_helper(login, object, data, callback) {
+		console.log('Facebook login');
+		console.log(login);
+		if (object) {
+			FB.api(object, data, function(response) {
+				console.log('Facebook get ' + object);
+				console.log(response);
+				callback(login, response);
+			});
+		} else {
+			callback(login);
+		}
+	}
+
 </script>
