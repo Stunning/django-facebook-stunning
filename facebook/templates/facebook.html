@@ -35,7 +35,9 @@
 		
 		FB.Canvas.setAutoGrow();
 
-		facebook_loaded();
+		if (typeof facebook_loaded !== "undefined") {
+			facebook_loaded();
+		}
 	};
 
 	// Load the SDK Asynchronously
@@ -69,7 +71,7 @@
 	 */
 
 	function facebook_get(object, scope, method, data, callback, debug_login, debug_data, allow_login) {
-		if (window.location.hostname === "localhost") {
+		if (facebook_debug) {
 			callback(debug_login || {}, debug_data || {});
 			return;
 		}
