@@ -70,7 +70,7 @@
 	 *
 	 */
 
-	function facebook_get(object, scope, method, data, callback, debug_login, debug_data, allow_login) {
+	function facebook_get(object, scope, method, data, callback, debug_login, debug_data, allow_login, cancel_callback) {
 		if (facebook_debug) {
 			callback(debug_login || {}, debug_data || {});
 			return;
@@ -81,32 +81,36 @@
 		if (allow_login === undefined) {
 			allow_login = true;
 		}
-		var login = FB.getAuthResponse();
-		if (login) {
-			facebook_get_helper(login, object, method, data, callback);
+		var fb_auth = FB.getAuthResponse();
+		if (fb_auth) {
+			facebook_get_helper(fb_auth, object, method, data, callback);
 		} else if (allow_login) {
 			FB.login(function(login) {
-				if (login.authResponse) {
+				fb_auth = login.authResponse;
+				if (fb_auth) {
 					console.log('Logged in');
-					facebook_get_helper(login, object, method, data, callback);
+					facebook_get_helper(fb_auth, object, method, data, callback);
 				} else {
 					console.log('User cancelled login or did not fully authorize.');
+					if (cancel_callback) {
+						cancel_callback();
+					}
 				}
 			}, {scope: scope});
 		}
 	}
 
-	function facebook_get_helper(login, object, method, data, callback) {
+	function facebook_get_helper(fb_auth, object, method, data, callback) {
 		console.log('Facebook login');
-		console.log(login);
+		console.log(fb_auth);
 		if (object) {
 			FB.api(object, method, data, function(response) {
 				console.log('Facebook get ' + object);
 				console.log(response);
-				callback(login, response);
+				callback(fb_auth, response);
 			});
 		} else {
-			callback(login);
+			callback(fb_auth);
 		}
 	}
 
