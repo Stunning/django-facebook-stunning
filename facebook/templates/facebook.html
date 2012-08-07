@@ -78,7 +78,9 @@
 		if (fb_scope) {
 			scope = fb_scope;
 		}
-		allow_login = allow_login || true;
+		if (allow_login === undefined) {
+			allow_login = true;
+		}
 		var login = FB.getAuthResponse();
 		if (login) {
 			facebook_get_helper(login, object, method, data, callback);
