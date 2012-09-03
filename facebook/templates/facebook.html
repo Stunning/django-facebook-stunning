@@ -105,6 +105,36 @@
 		}
 	}
 
+    function facebook_login(scope, callback) {
+        FB.login(function(login) {
+            fb_auth = login.authResponse;
+            if (fb_auth) {
+                console.log('Facebook: Logged in');
+                check_perms(scope, callback);
+            } else {
+                console.log('Facebook: User cancelled login or did not fully authorize.');
+                if (cancel_callback) {
+                    cancel_callback();
+                }
+            }
+        }, {scope: scope});
+    }
+
+    function check_perms(scope, callback) {
+        FB.api('/me/permissions', function(fb_permissions) {
+            var req_perm_list = scope.split(',');
+            var has_perm_dict = fb_permissions.data[0] 
+            for (var i=0; i<perm_list.length; ++i) {
+                var perm = perm_list[i];
+                if (has_perm_dict[perm] !== 1) {
+                    console.log('Missing required permission ' + perm);
+                    facebook_login(scope, callback);
+                }
+            }
+            callback();
+        });
+    }
+    
 	function facebook_get_helper(fb_auth, object, method, data, callback, cancel_callback) {
 		console.log('Facebook: Auth object:');
 		console.log(fb_auth);
