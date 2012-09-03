@@ -83,31 +83,44 @@
 		}
 		var fb_auth = FB.getAuthResponse();
 		if (fb_auth) {
-			facebook_get_helper(fb_auth, object, method, data, callback);
+			facebook_get_helper(fb_auth, object, method, data, callback, cancel_callback);
 		} else if (allow_login) {
 			FB.login(function(login) {
 				fb_auth = login.authResponse;
 				if (fb_auth) {
-					console.log('Logged in');
-					facebook_get_helper(fb_auth, object, method, data, callback);
+					console.log('Facebook: Logged in');
+					facebook_get_helper(fb_auth, object, method, data, callback, cancel_callback);
 				} else {
-					console.log('User cancelled login or did not fully authorize.');
+					console.log('Facebook: User cancelled login or did not fully authorize.');
 					if (cancel_callback) {
 						cancel_callback();
 					}
 				}
 			}, {scope: scope});
+		} else {
+            console.log('Facebook: Not already logged in, and login not allowed. Cancelling.');
+            if (cancel_callback) {
+                cancel_callback();
+            }
 		}
 	}
 
-	function facebook_get_helper(fb_auth, object, method, data, callback) {
-		console.log('Facebook login');
+	function facebook_get_helper(fb_auth, object, method, data, callback, cancel_callback) {
+		console.log('Facebook: Auth object:');
 		console.log(fb_auth);
 		if (object) {
+            console.log('Facebook: Call API: ' + method + ' ' + object);
 			FB.api(object, method, data, function(response) {
-				console.log('Facebook get ' + object);
+				console.log('Facebook: API response:');
 				console.log(response);
-				callback(fb_auth, response);
+                if (!response || response.error) {
+                	console.log('Facebook: Error - see response')
+                    if (cancel_callback) {
+                    	cancel_callback(response);
+                    }
+                } else {
+                    callback(fb_auth, response);
+                }
 			});
 		} else {
 			callback(fb_auth);
